@@ -27,44 +27,19 @@ router.post("/register", async (req, res) => {
   }
 
   const existing = await db.select().from(usersTable).where(eq(usersTable.email, email)).limit(1);
-  if (existing.length > 0 && existing[0].isVerified) {
+  if (existing.length > 0) {
     return res.status(400).json({ error: "Email already registered. Please login." });
   }
 
-  if (existing.length === 0) {
-    const passwordHash = await bcrypt.hash(password, 10);
-    await db.insert(usersTable).values({
-      name,
-      email,
-      passwordHash,
-      role: role as "student" | "faculty" | "admin",
-      isAdmin: role === "admin",
-      isVerified: false,
-    });
-  }
-
-  const otp = await createOtp(email, "registration");
-  await sendOtpEmail(email, otp, "registration");
-
-  return res.json({ message: `OTP sent to ${email}. Please check your email. (Demo OTP: ${otp})` });
-});
-
-router.post("/verify-registration", async (req, res) => {
-  const { email, otp } = req.body;
-
-  if (!email || !otp) {
-    return res.status(400).json({ error: "Email and OTP are required" });
-  }
-
-  const valid = await verifyOtp(email, otp, "registration");
-  if (!valid) {
-    return res.status(400).json({ error: "Invalid or expired OTP" });
-  }
-
-  const users = await db.update(usersTable)
-    .set({ isVerified: true })
-    .where(eq(usersTable.email, email))
-    .returning();
+  const passwordHash = await bcrypt.hash(password, 10);
+  const users = await db.insert(usersTable).values({
+    name,
+    email,
+    passwordHash,
+    role: role as "student" | "faculty" | "admin",
+    isAdmin: role === "admin",
+    isVerified: true,
+  }).returning();
 
   const user = users[0];
 

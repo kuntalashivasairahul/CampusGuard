@@ -106,27 +106,6 @@ router.post("/login", async (req, res) => {
     return res.status(401).json({ error: "Invalid email or password" });
   }
 
-  const otp = await createOtp(email, "login");
-  await sendOtpEmail(email, otp, "login");
-
-  return res.json({ message: `OTP sent to ${email}. Please check your email. (Demo OTP: ${otp})` });
-});
-
-router.post("/verify-login", async (req, res) => {
-  const { email, otp } = req.body;
-
-  if (!email || !otp) {
-    return res.status(400).json({ error: "Email and OTP are required" });
-  }
-
-  const valid = await verifyOtp(email, otp, "login");
-  if (!valid) {
-    return res.status(400).json({ error: "Invalid or expired OTP" });
-  }
-
-  const users = await db.select().from(usersTable).where(eq(usersTable.email, email)).limit(1);
-  const user = users[0];
-
   req.session.userId = user.id;
   req.session.isAdmin = user.isAdmin;
 

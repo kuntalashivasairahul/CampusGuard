@@ -1,0 +1,23 @@
+Build a responsive, modern web application for a "College Lost & Found" system. The platform must be restricted to college members (students/faculty) using official college email IDs.
+​Core Features & User Flow:
+​Authentication & Security:
+​Login/Register: A beautiful landing page with options for "Student/Faculty Login" and "Admin Login."
+​College Verification: Registration must require a college email ID. Implement an OTP-based verification system for both registration and login to ensure security.
+​User Dashboard & Home Page (Social Feed Style):
+​Home Feed: An Instagram-style vertical feed showing posts of "Lost" or "Found" items. Each post should include a photo, title, description, location found/lost, and a timestamp.
+​Report Item: A dedicated section or floating button to upload a new post (Upload image, category selection, and details).
+​Secure Claim System (The OTP Logic):
+​If a user identifies their item in a "Found" post, they can click "Claim."
+​Once a claim is initiated, the system must facilitate a connection between the finder and the owner.
+​Verification: Generate a unique 6-digit OTP for the transaction. The person who found the item must enter this OTP (provided by the owner) to mark the item as "Returned."
+​Activity Logs: A "My Activity" tab for users to track their reported items and claimed items.
+​Admin Panel (Management & Logs):
+​A separate, secure dashboard for college club members/admins.
+​Master Logs: View every transaction, including who found what, who claimed it, and the timestamps of the OTP verification.
+​Resolution Center: Ability to delete inappropriate posts or flag suspicious claim activity.
+​Support & Communication:
+​An AI Chatbot or a "Report Dispute" option to help users if someone else falsely claims an item.
+​Design Requirements (UI/UX):
+​Theme: Professional yet modern (Clean white/blue or dark mode options).
+​Navigation: A sleek sidebar for Desktop and a bottom navigation bar for Mobile.
+​Components: Use Card-based layouts for the feed and real-time notifications for OTP alerts.

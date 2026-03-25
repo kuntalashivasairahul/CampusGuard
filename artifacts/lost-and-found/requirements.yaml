@@ -1,0 +1,24 @@
+packages:
+  "framer-motion": "For page transitions, smooth modal animations, and interactive feed cards"
+  "recharts": "For the admin dashboard statistics and charts"
+  "react-hook-form": "For robust form state management in reporting and auth"
+  "@hookform/resolvers": "To integrate Zod validation with react-hook-form"
+  "date-fns": "For elegant relative time formatting (e.g., '2 hours ago') on feed posts"
+  "clsx": "For conditional class name merging"
+  "tailwind-merge": "For resolving Tailwind class conflicts"
+
+images:
+  - path: "artifacts/lost-and-found/public/images/hero-bg.png"
+    description: "Abstract elegant flowing gradient mesh background in deep corporate blues and soft whites, modern minimal premium aesthetic"
+    aspect_ratio: "16:9"
+  - path: "artifacts/lost-and-found/public/images/auth-side.png"
+    description: "Abstract clean minimalist 3D rendering of university campus architecture with subtle blue accent lighting, high end matte texture"
+    aspect_ratio: "9:16"
+  - path: "artifacts/lost-and-found/public/images/empty-state.png"
+    description: "Minimalist modern 3D illustration of a floating cardboard box and a magnifying glass, soft lighting, clean white background with blue accents"
+    aspect_ratio: "1:1"
+
+notes:
+  - Assuming @workspace/api-client-react is available and properly configured.
+  - Image upload expects base64 string, so FileReader will be used on the frontend.
+  - Auth uses HTTP-only cookies, so credentials: 'include' is handled by the generated API client.

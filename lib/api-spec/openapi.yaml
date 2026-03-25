@@ -1,22 +1,30 @@
 openapi: 3.1.0
 info:
-  # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
-  description: API specification
+  description: College Lost & Found API
 servers:
   - url: /api
     description: Base API path
 tags:
   - name: health
     description: Health operations
+  - name: auth
+    description: Authentication operations
+  - name: items
+    description: Lost and found items
+  - name: claims
+    description: Item claims and OTP verification
+  - name: admin
+    description: Admin operations
+  - name: chat
+    description: AI chatbot support
 paths:
   /healthz:
     get:
       operationId: healthCheck
       tags: [health]
       summary: Health check
-      description: Returns server health status
       responses:
         "200":
           description: Healthy
@@ -24,6 +32,432 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+
+  /auth/register:
+    post:
+      operationId: registerUser
+      tags: [auth]
+      summary: Register with college email
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RegisterRequest"
+      responses:
+        "200":
+          description: OTP sent to email
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MessageResponse"
+        "400":
+          description: Invalid email or already registered
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /auth/verify-registration:
+    post:
+      operationId: verifyRegistration
+      tags: [auth]
+      summary: Verify registration OTP and create account
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/VerifyOtpRequest"
+      responses:
+        "200":
+          description: Account created successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthResponse"
+        "400":
+          description: Invalid OTP
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /auth/login:
+    post:
+      operationId: loginUser
+      tags: [auth]
+      summary: Login and request OTP
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginRequest"
+      responses:
+        "200":
+          description: OTP sent to email
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MessageResponse"
+        "401":
+          description: Invalid credentials
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /auth/verify-login:
+    post:
+      operationId: verifyLogin
+      tags: [auth]
+      summary: Verify login OTP
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/VerifyOtpRequest"
+      responses:
+        "200":
+          description: Logged in
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthResponse"
+        "400":
+          description: Invalid OTP
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /auth/logout:
+    post:
+      operationId: logoutUser
+      tags: [auth]
+      summary: Logout current user
+      responses:
+        "200":
+          description: Logged out
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MessageResponse"
+
+  /auth/me:
+    get:
+      operationId: getCurrentUser
+      tags: [auth]
+      summary: Get current logged-in user
+      responses:
+        "200":
+          description: Current user
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        "401":
+          description: Not authenticated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /items:
+    get:
+      operationId: listItems
+      tags: [items]
+      summary: List all items (feed)
+      parameters:
+        - name: type
+          in: query
+          schema:
+            type: string
+            enum: [lost, found, all]
+          description: Filter by item type
+        - name: category
+          in: query
+          schema:
+            type: string
+          description: Filter by category
+        - name: page
+          in: query
+          schema:
+            type: number
+        - name: limit
+          in: query
+          schema:
+            type: number
+      responses:
+        "200":
+          description: List of items
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ItemListResponse"
+
+    post:
+      operationId: createItem
+      tags: [items]
+      summary: Report a lost or found item
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateItemRequest"
+      responses:
+        "201":
+          description: Item created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Item"
+        "401":
+          description: Not authenticated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /items/{id}:
+    get:
+      operationId: getItem
+      tags: [items]
+      summary: Get a single item
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: number
+      responses:
+        "200":
+          description: Item details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Item"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+    delete:
+      operationId: deleteItem
+      tags: [items]
+      summary: Delete an item (owner or admin)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: number
+      responses:
+        "200":
+          description: Deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MessageResponse"
+
+  /items/upload-image:
+    post:
+      operationId: uploadItemImage
+      tags: [items]
+      summary: Upload an item image (base64)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UploadImageRequest"
+      responses:
+        "200":
+          description: Image URL
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UploadImageResponse"
+
+  /claims:
+    post:
+      operationId: createClaim
+      tags: [claims]
+      summary: Initiate a claim on a found item
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateClaimRequest"
+      responses:
+        "201":
+          description: Claim created and OTP generated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ClaimResponse"
+        "400":
+          description: Cannot claim own item or item already claimed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /claims/{id}/verify:
+    post:
+      operationId: verifyClaim
+      tags: [claims]
+      summary: Finder enters OTP to confirm item returned
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: number
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/VerifyClaimRequest"
+      responses:
+        "200":
+          description: Item marked as returned
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MessageResponse"
+        "400":
+          description: Invalid OTP
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /claims/my:
+    get:
+      operationId: getMyClaims
+      tags: [claims]
+      summary: Get my activity (reported + claimed items)
+      responses:
+        "200":
+          description: User activity
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MyActivity"
+
+  /admin/items:
+    get:
+      operationId: adminListItems
+      tags: [admin]
+      summary: Admin - list all items with filters
+      parameters:
+        - name: status
+          in: query
+          schema:
+            type: string
+        - name: page
+          in: query
+          schema:
+            type: number
+      responses:
+        "200":
+          description: Admin items list
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ItemListResponse"
+
+  /admin/transactions:
+    get:
+      operationId: adminListTransactions
+      tags: [admin]
+      summary: Admin - master transaction logs
+      responses:
+        "200":
+          description: All transactions
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TransactionListResponse"
+
+  /admin/items/{id}:
+    delete:
+      operationId: adminDeleteItem
+      tags: [admin]
+      summary: Admin - delete inappropriate post
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: number
+      responses:
+        "200":
+          description: Deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MessageResponse"
+
+  /admin/claims/{id}/flag:
+    post:
+      operationId: adminFlagClaim
+      tags: [admin]
+      summary: Admin - flag suspicious claim
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: number
+      responses:
+        "200":
+          description: Claim flagged
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MessageResponse"
+
+  /admin/stats:
+    get:
+      operationId: adminGetStats
+      tags: [admin]
+      summary: Admin - dashboard statistics
+      responses:
+        "200":
+          description: Stats
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminStats"
+
+  /chat/message:
+    post:
+      operationId: sendChatMessage
+      tags: [chat]
+      summary: Send a message to the AI support chatbot
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ChatRequest"
+      responses:
+        "200":
+          description: AI response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ChatResponse"
+
 components:
   schemas:
     HealthStatus:
@@ -31,6 +465,296 @@ components:
       properties:
         status:
           type: string
-      required:
-        - status
+      required: [status]
 
+    MessageResponse:
+      type: object
+      properties:
+        message:
+          type: string
+      required: [message]
+
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+      required: [error]
+
+    RegisterRequest:
+      type: object
+      properties:
+        name:
+          type: string
+        email:
+          type: string
+        password:
+          type: string
+        role:
+          type: string
+          enum: [student, faculty, admin]
+      required: [name, email, password, role]
+
+    LoginRequest:
+      type: object
+      properties:
+        email:
+          type: string
+        password:
+          type: string
+      required: [email, password]
+
+    VerifyOtpRequest:
+      type: object
+      properties:
+        email:
+          type: string
+        otp:
+          type: string
+      required: [email, otp]
+
+    AuthResponse:
+      type: object
+      properties:
+        user:
+          $ref: "#/components/schemas/User"
+        message:
+          type: string
+      required: [user, message]
+
+    User:
+      type: object
+      properties:
+        id:
+          type: number
+        name:
+          type: string
+        email:
+          type: string
+        role:
+          type: string
+        isAdmin:
+          type: boolean
+        createdAt:
+          type: string
+      required: [id, name, email, role, isAdmin, createdAt]
+
+    Item:
+      type: object
+      properties:
+        id:
+          type: number
+        type:
+          type: string
+          enum: [lost, found]
+        title:
+          type: string
+        description:
+          type: string
+        category:
+          type: string
+        location:
+          type: string
+        imageUrl:
+          type: string
+          nullable: true
+        status:
+          type: string
+          enum: [active, claimed, returned]
+        reportedBy:
+          type: number
+        reporterName:
+          type: string
+        reporterEmail:
+          type: string
+        createdAt:
+          type: string
+        claimCount:
+          type: number
+      required: [id, type, title, description, category, location, status, reportedBy, reporterName, reporterEmail, createdAt, claimCount]
+
+    ItemListResponse:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/Item"
+        total:
+          type: number
+        page:
+          type: number
+        limit:
+          type: number
+      required: [items, total, page, limit]
+
+    CreateItemRequest:
+      type: object
+      properties:
+        type:
+          type: string
+          enum: [lost, found]
+        title:
+          type: string
+        description:
+          type: string
+        category:
+          type: string
+        location:
+          type: string
+        imageUrl:
+          type: string
+          nullable: true
+      required: [type, title, description, category, location]
+
+    UploadImageRequest:
+      type: object
+      properties:
+        imageData:
+          type: string
+          description: Base64 encoded image
+        mimeType:
+          type: string
+      required: [imageData, mimeType]
+
+    UploadImageResponse:
+      type: object
+      properties:
+        imageUrl:
+          type: string
+      required: [imageUrl]
+
+    CreateClaimRequest:
+      type: object
+      properties:
+        itemId:
+          type: number
+        message:
+          type: string
+      required: [itemId, message]
+
+    ClaimResponse:
+      type: object
+      properties:
+        id:
+          type: number
+        itemId:
+          type: number
+        claimerId:
+          type: number
+        status:
+          type: string
+        otp:
+          type: string
+          description: OTP for the claimant to share with the finder
+        message:
+          type: string
+        createdAt:
+          type: string
+      required: [id, itemId, claimerId, status, otp, message, createdAt]
+
+    VerifyClaimRequest:
+      type: object
+      properties:
+        otp:
+          type: string
+      required: [otp]
+
+    Claim:
+      type: object
+      properties:
+        id:
+          type: number
+        itemId:
+          type: number
+        itemTitle:
+          type: string
+        itemType:
+          type: string
+        claimerId:
+          type: number
+        claimerName:
+          type: string
+        claimerEmail:
+          type: string
+        status:
+          type: string
+        message:
+          type: string
+        flagged:
+          type: boolean
+        createdAt:
+          type: string
+        verifiedAt:
+          type: string
+          nullable: true
+      required: [id, itemId, itemTitle, itemType, claimerId, claimerName, claimerEmail, status, message, flagged, createdAt]
+
+    MyActivity:
+      type: object
+      properties:
+        reportedItems:
+          type: array
+          items:
+            $ref: "#/components/schemas/Item"
+        claims:
+          type: array
+          items:
+            $ref: "#/components/schemas/Claim"
+      required: [reportedItems, claims]
+
+    TransactionListResponse:
+      type: object
+      properties:
+        transactions:
+          type: array
+          items:
+            $ref: "#/components/schemas/Claim"
+        total:
+          type: number
+      required: [transactions, total]
+
+    AdminStats:
+      type: object
+      properties:
+        totalItems:
+          type: number
+        lostItems:
+          type: number
+        foundItems:
+          type: number
+        returnedItems:
+          type: number
+        pendingClaims:
+          type: number
+        totalUsers:
+          type: number
+      required: [totalItems, lostItems, foundItems, returnedItems, pendingClaims, totalUsers]
+
+    ChatRequest:
+      type: object
+      properties:
+        message:
+          type: string
+        history:
+          type: array
+          items:
+            $ref: "#/components/schemas/ChatMessage"
+      required: [message]
+
+    ChatMessage:
+      type: object
+      properties:
+        role:
+          type: string
+          enum: [user, assistant]
+        content:
+          type: string
+      required: [role, content]
+
+    ChatResponse:
+      type: object
+      properties:
+        reply:
+          type: string
+      required: [reply]

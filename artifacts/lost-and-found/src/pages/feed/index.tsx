@@ -122,7 +122,8 @@ export default function FeedPage() {
           <AnimatePresence>
             {items.map((item, i) => {
               const isOwner = user?.id === item.reportedBy;
-              const canClaim = !isOwner && item.type === "found" && item.status === "active";
+              const canClaim = !isOwner && item.status === "active";
+              const claimLabel = item.type === "found" ? "It's Mine!" : "I Found This!";
 
               return (
                 <motion.div
@@ -195,7 +196,7 @@ export default function FeedPage() {
                       className="absolute bottom-[72px] left-0 right-0 mx-4 py-2.5 px-4 bg-primary text-primary-foreground rounded-xl font-semibold text-sm shadow-lg shadow-primary/30 flex items-center justify-center gap-2 opacity-0 group-hover:opacity-100 translate-y-2 group-hover:translate-y-0 transition-all duration-200 z-10"
                     >
                       <HandHelping className="w-4 h-4" />
-                      It's Mine!
+                      {claimLabel}
                     </button>
                   )}
                 </motion.div>

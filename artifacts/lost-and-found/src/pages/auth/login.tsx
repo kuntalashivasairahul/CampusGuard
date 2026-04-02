@@ -23,7 +23,7 @@ export default function LoginPage() {
   const loginMutation = useLoginUser({
     mutation: {
       onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: ["/api/auth/me"] });
+        queryClient.invalidateQueries({ queryKey: ["getCurrentUser"] });
         toast({ title: "Welcome back!" });
         setLocation("/feed");
       },

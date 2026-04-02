@@ -26,7 +26,7 @@ export default function RegisterPage() {
   const registerMutation = useRegisterUser({
     mutation: {
       onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: ["/api/auth/me"] });
+        queryClient.invalidateQueries({ queryKey: ["getCurrentUser"] });
         toast({ title: "Account created successfully!" });
         setLocation("/feed");
       },

@@ -37,9 +37,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const logoutMutation = useLogoutUser({
     mutation: {
       onSuccess: () => {
+        // Clear stored JWT token (used for cross-origin auth on Render)
+        localStorage.removeItem("jwt_token");
         queryClient.clear();
         setLocation("/login");
         toast({ title: "Logged out successfully" });
+      },
+      onError: () => {
+        // Clear token even if server logout fails (e.g. session already expired)
+        localStorage.removeItem("jwt_token");
+        queryClient.clear();
+        setLocation("/login");
       }
     }
   });

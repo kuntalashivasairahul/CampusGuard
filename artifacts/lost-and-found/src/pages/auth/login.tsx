@@ -22,7 +22,11 @@ export default function LoginPage() {
 
   const loginMutation = useLoginUser({
     mutation: {
-      onSuccess: () => {
+      onSuccess: (data: any) => {
+        // Store JWT in localStorage for cross-origin auth on Render
+        if (data?.token) {
+          localStorage.setItem("jwt_token", data.token);
+        }
         queryClient.invalidateQueries({ queryKey: ["getCurrentUser"] });
         toast({ title: "Welcome back!" });
         setLocation("/feed");

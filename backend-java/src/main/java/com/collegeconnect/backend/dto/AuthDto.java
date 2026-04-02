@@ -51,5 +51,6 @@ public class AuthDto {
     public static class AuthResponse {
         private UserDto user;
         private String message;
+        private String token; // JWT returned in body for cross-origin clients
     }
 }

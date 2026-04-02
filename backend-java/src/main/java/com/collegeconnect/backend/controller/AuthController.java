@@ -76,7 +76,7 @@ public class AuthController {
         String jwt = tokenProvider.generateToken(user.getId(), user.getEmail());
         setJwtCookie(response, jwt);
 
-        return ResponseEntity.ok(new AuthDto.AuthResponse(AuthDto.UserDto.fromEntity(user), "Registration successful!"));
+        return ResponseEntity.ok(new AuthDto.AuthResponse(AuthDto.UserDto.fromEntity(user), "Registration successful!", jwt));
     }
 
     @PostMapping("/login")
@@ -97,7 +97,7 @@ public class AuthController {
         String jwt = tokenProvider.generateToken(user.getId(), user.getEmail());
         setJwtCookie(response, jwt);
 
-        return ResponseEntity.ok(new AuthDto.AuthResponse(AuthDto.UserDto.fromEntity(user), "Login successful!"));
+        return ResponseEntity.ok(new AuthDto.AuthResponse(AuthDto.UserDto.fromEntity(user), "Login successful!", jwt));
     }
 
     @PostMapping("/logout")

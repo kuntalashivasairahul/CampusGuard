@@ -25,7 +25,11 @@ export default function RegisterPage() {
 
   const registerMutation = useRegisterUser({
     mutation: {
-      onSuccess: () => {
+      onSuccess: (data: any) => {
+        // Store JWT in localStorage for cross-origin auth on Render
+        if (data?.token) {
+          localStorage.setItem("jwt_token", data.token);
+        }
         queryClient.invalidateQueries({ queryKey: ["getCurrentUser"] });
         toast({ title: "Account created successfully!" });
         setLocation("/feed");

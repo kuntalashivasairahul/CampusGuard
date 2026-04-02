@@ -30,8 +30,9 @@ services:
         value: org.hibernate.dialect.PostgreSQLDialect
       - key: JWT_SECRET
         generateValue: true
+      # Allow any origin so the static site can call the API
       - key: ALLOWED_ORIGINS
-        value: "*" # Initially allow all for ease of deployment, restrict later
+        value: "*"
 
   # 3. Frontend Static Site (React/Vite)
   - type: static
@@ -41,8 +42,9 @@ services:
     buildCommand: pnpm install && pnpm run build --filter @workspace/lost-and-found
     staticPublishPath: artifacts/lost-and-found/dist/public
     envVars:
+      # This gives the frontend the full https:// URL of the API service
       - key: VITE_API_URL
         fromService:
           type: web
           name: college-connect-api
-          property: host
+          property: hostWithScheme
